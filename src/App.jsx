@@ -2,22 +2,34 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [tasks, setTasks] = useState([])
+  const [tasks, setTasks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tasks')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const [input, setInput] = useState('')
+
+  const saveTasks = (next) => {
+    setTasks(next)
+    localStorage.setItem('tasks', JSON.stringify(next))
+  }
 
   const addTask = () => {
     const text = input.trim()
     if (!text) return
-    setTasks([...tasks, { id: Date.now(), text, done: false }])
+    saveTasks([...tasks, { id: Date.now(), text, done: false }])
     setInput('')
   }
 
   const toggleTask = (id) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t))
+    saveTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t))
   }
 
   const deleteTask = (id) => {
-    setTasks(tasks.filter(t => t.id !== id))
+    saveTasks(tasks.filter(t => t.id !== id))
   }
 
   const handleKeyDown = (e) => {
